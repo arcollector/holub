@@ -6,38 +6,45 @@ type token =
   | LeftParent
   | RightParent
   | NumOrId of string
+  | Kwd of char
 
-let rec lexer acc = parser
-  | [< ' (' ' | '\t' | '\n'); stream >] -> lexer acc stream
+let rec lexer = parser
+  | [< ' (' ' | '\t' | '\n'); stream >] ->
+    lexer stream
 
-  | [< ' (';'); stream >] -> lexer (Semi::acc) stream
+  | [< ' (';'); stream >] ->
+    [< ' Semi; lexer stream >]
  
-  | [< ' ('+'); stream >] -> lexer (Plus::acc) stream
+  | [< ' ('+'); stream >] ->
+    [< ' Plus; lexer stream >]
 
-  | [< ' ('*'); stream >] -> lexer (Times::acc) stream
+  | [< ' ('*'); stream >] ->
+    [< ' Times; lexer stream >]
 
-  | [< ' ('('); stream >] -> lexer (LeftParent::acc) stream
+  | [< ' ('('); stream >] ->
+    [< ' LeftParent; lexer stream >]
 
-  | [< ' (')'); stream >] -> lexer (RightParent::acc) stream
+  | [< ' (')'); stream >] ->
+    [< ' RightParent; lexer stream >]
 
   | [< ' ('a'..'z' | 'A'..'Z' | '0'..'9' as ch); stream >] ->
     let buf = Buffer.create 1 in
     Buffer.add_char buf ch;
-    lexer_num_or_id buf stream;
-    let num_or_id = Buffer.contents buf in
-    lexer (NumOrId num_or_id::acc) stream
+    lexer_num_or_id buf stream
+
+  | [< ' ch; stream >] ->
+    [< ' Kwd ch; lexer stream >]
 
   (* this not means EOF, this means that when a not matching
    * char is encounter, the lexering process will ends *)
-  | [< >] -> List.rev acc
-
-and lexer_num_or_id buf stream =
-  let rec readstream = parser
-  | [< ' ('a'..'z' | 'A'..'Z' | '0'..'9' as ch) >] ->
-    Buffer.add_char buf ch;
-    readstream stream
-    
   | [< >] ->
-    ()
-  in
-  readstream stream
+    [< ' Eoi >]
+
+and lexer_num_or_id buf = parser
+  | [< ' ('a'..'z' | 'A'..'Z' | '0'..'9' as ch); stream >] ->
+    Buffer.add_char buf ch;
+    lexer_num_or_id buf stream
+    
+  | [< stream >] ->
+    let num_or_id = Buffer.contents buf in
+    [< ' NumOrId num_or_id; lexer stream >]
