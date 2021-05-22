@@ -1,4 +1,5 @@
 <lexer_o.ml>: pp(camlp5o)
 <lexer_r.ml>: pp(camlp5r)
-<parser.ml>: pp(camlp5o)
+<parser_rec.ml>: pp(camlp5o)
+<parser_rec_2.ml>: pp(camlp5o)
 <_test_/*>: package(oUnit), package(fmt)

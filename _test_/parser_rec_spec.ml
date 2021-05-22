@@ -2,7 +2,6 @@ open OUnit2
 module L = Lexer_o
 
 let tests = "test suite" >::: [
-  (*
   "22 * 45" >:: (fun _ ->
     let payload = [
       L.NumOrId "22";
@@ -10,7 +9,7 @@ let tests = "test suite" >::: [
       L.NumOrId "45";
       L.Eoi
     ] |> Stream.of_list in
-    Parser.statements payload
+    Parser_rec.statements payload
   );
 
   "22 + 45 * (154 + 28)" >:: (fun _ ->
@@ -26,7 +25,7 @@ let tests = "test suite" >::: [
       L.RightParent;
       L.Eoi
     ] |> Stream.of_list in
-    Parser.statements payload
+    Parser_rec.statements payload
   );
   
   "22 45" >:: (fun _ ->
@@ -35,9 +34,8 @@ let tests = "test suite" >::: [
       L.NumOrId "45";
       L.Eoi
     ] |> Stream.of_list in
-    Parser.statements payload
+    Parser_rec.statements payload
   );
-  *)
 
   "(22" >:: (fun _ ->
     let payload = [
@@ -47,7 +45,7 @@ let tests = "test suite" >::: [
     ] |> Stream.of_list in
     assert_raises
       (Stream.Error "Mismatched parenthesis")
-      (fun () -> Parser.statements payload)
+      (fun () -> Parser_rec.statements payload)
   );
 ]
 
