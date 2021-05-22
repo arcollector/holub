@@ -1,6 +1,8 @@
 open OUnit2
 module L = Lexer_o
 
+let identity = fun x -> x
+
 let tests = "test suite" >::: [
   "22 * 45" >:: (fun _ ->
     let payload = [
@@ -9,7 +11,13 @@ let tests = "test suite" >::: [
       L.NumOrId "45";
       L.Eoi
     ] |> Stream.of_list in
-    Parser_rec_2.statements payload
+    let expected = [
+      "\tt0 = 22\n";
+      "\tt1 = 45\n";
+      "\tt0 *= t1\n"
+    ] |> String.concat "" in
+    let real = Parser_rec_2.statements payload in
+    assert_equal expected real ~printer:identity
   );
 
   "22 + 45 * (154 + 28)" >:: (fun _ ->
@@ -25,7 +33,17 @@ let tests = "test suite" >::: [
       L.RightParent;
       L.Eoi
     ] |> Stream.of_list in
-    Parser_rec_2.statements payload
+    let expected = [
+      "\tt0 = 22\n";
+      "\tt1 = 45\n";
+      "\tt2 = 154\n";
+      "\tt3 = 28\n";
+      "\tt2 += t3\n";
+      "\tt1 *= t2\n";
+      "\tt0 += t1\n";
+    ] |> String.concat "" in
+    let real = Parser_rec_2.statements payload in
+    assert_equal expected real ~printer:identity
   );
   
   "22 45" >:: (fun _ ->
@@ -34,7 +52,12 @@ let tests = "test suite" >::: [
       L.NumOrId "45";
       L.Eoi
     ] |> Stream.of_list in
-    Parser_rec_2.statements payload
+    let expected = [
+      "\tt0 = 22\n";
+      "\tt0 = 45\n";
+    ] |> String.concat "" in
+    let real = Parser_rec_2.statements payload in
+    assert_equal expected real ~printer:identity
   );
 
   "( )" >:: (fun _ ->
