@@ -3,3 +3,4 @@
 <parser_rec.ml>: pp(camlp5o)
 <parser_rec_2.ml>: pp(camlp5o)
 <_test_/*>: package(oUnit), package(fmt)
+<exercises/ex_1.ml>: pp(camlp5o)

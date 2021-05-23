@@ -1,4 +1,5 @@
 B _build
+B _build/exercises
 PKG oUnit
 PKG fmt
 PKG batteries

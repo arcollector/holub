@@ -20,5 +20,11 @@ parser_rec_2:
 test_parser_rec_2: parser_rec_2
 	ocamlbuild -use-ocamlfind _test_/parser_rec_2_spec.native
 
+ex_1:
+	ocamlbuild -use-ocamlfind exercises/ex_1.native
+
+ex_1_spec: ex_1
+	ocamlbuild -use-ocamlfind -I exercises _test_/ex_1_spec.native
+
 clean:
-	rm *.native
+	rm -rf *.native _build
