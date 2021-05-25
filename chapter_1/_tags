@@ -5,3 +5,4 @@
 <_test_/*>: package(oUnit), package(fmt)
 <exercises/ex_1.ml>: pp(camlp5o)
 <exercises/ex_3.ml>: pp(camlp5o)
+<exercises/ex_6.ml>: pp(camlp5o)

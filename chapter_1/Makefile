@@ -32,5 +32,8 @@ ex_3:
 ex_3_spec: ex_1
 	ocamlbuild -use-ocamlfind -I exercises _test_/ex_3_spec.native
 
+ex_6:
+	ocamlbuild -use-ocamlfind exercises/ex_6.native
+
 clean:
 	rm -rf *.native _build
