@@ -69,8 +69,7 @@ g2 = { dfa_state = 5;c = D;next_dfa_state = Some 6;accept = Some 14 };
             let where2 = List.exists (pred next_next_index) g in
             string_of_bool where1 |> print_endline;
             string_of_bool where2 |> print_endline;
-            begin
-            match where1, where2 with
+            begin match where1, where2 with
             | true, false
             | false, true ->
               (* tengo que buscar en g todos los items con
@@ -80,8 +79,7 @@ g2 = { dfa_state = 5;c = D;next_dfa_state = Some 6;accept = Some 14 };
             | false, false ->
               acc @ (get_items_by_dfa_state next.dfa_state g)
             | true, true ->
-              just_one_partition char_set (char_set_index + 1)
-            end
+              just_one_partition char_set (char_set_index + 1) end
           | Some first_next_index, None ->
             (* next_next_index apunta a None, se va de este grupo *)
             acc @ (get_items_by_dfa_state next.dfa_state g)
