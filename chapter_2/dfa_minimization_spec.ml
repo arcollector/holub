@@ -1,6 +1,7 @@
 open OUnit2
 
 module MyRegex = MyRegexParser
+module NfaToDfa = Nfa_to_dfa.NfaToDfa
 
 let epsilon_nfa = MyRegex.new_nfa Epsilon []
 (* start -> e or start  -> (D+)?.D ---> e or end -> end *)
@@ -26,17 +27,21 @@ let nfa_list = [
 
   { epsilon_nfa with next = None }; (*14*)
 ]
-
 let char_set = ['D'; '.']
 
-let nfa_to_dfa_tests = 
-  "Nfa to dfa" >::: [
-    "Nfa to dfa" >:: (fun _ -> 
-      let nfa_dfa = Nfa_to_dfa.NfaToDfa.(make char_set nfa_list |> run [0]) in
-      Nfa_to_dfa.NfaToDfa.print nfa_dfa |> print_endline;
+let dfa_minimization = 
+  "Dfa minimization" >::: [
+    "dfa minimization" >:: (fun _ -> 
+      let nfa_dfa = NfaToDfa.(make char_set nfa_list |> run [0]) in
+      let minimized_dfa = Dfa_minimization.minimization nfa_dfa in
+
+      minimized_dfa |> List.length |> string_of_int |> print_endline;
+      List.iter (fun x -> NfaToDfa.print_transition_list x |> print_endline; print_endline "-!") minimized_dfa;
       ()
     );
   ]
 
 let () =
-  run_test_tt_main nfa_to_dfa_tests
+  run_test_tt_main ("Dfa minimization" >::: [
+    dfa_minimization;
+  ])

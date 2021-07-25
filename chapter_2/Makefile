@@ -42,3 +42,7 @@ nfa_to_dfa_spec: nfa_to_dfa
 dfa_minimization: nfa_to_dfa
 	ocamlbuild dfa_minimization.byte
 	./dfa_minimization.byte
+
+dfa_minimization_spec: dfa_minimization
+	ocamlbuild -pkg ounit2 dfa_minimization_spec.byte
+	./dfa_minimization_spec.byte

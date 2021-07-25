@@ -1,36 +1,9 @@
 module NfaToDfa = Nfa_to_dfa.NfaToDfa
-module MyRegex = MyRegexParser
 
-let epsilon_nfa = MyRegex.new_nfa Epsilon []
-(* start -> e or start  -> (D+)?.D ---> e or end -> end *)
-(*                  |--->  D.(D+)? ---|                 *)
-let nfa_list = [
-  epsilon_nfa; (*0*)
-
-  { epsilon_nfa with next_2 = Some 7 }; (*1*)
-
-  { epsilon_nfa with next_2 = Some 3 }; (*2*)
-  MyRegex.new_nfa (Char 'D') []; (*3*)
-  { epsilon_nfa with next_2 = Some (-1) }; (*4*)
-  MyRegex.new_nfa (Char '.') []; (*5*)
-  MyRegex.new_nfa (Char 'D') []; (*6*)
-  { epsilon_nfa with next = Some 7 }; (*7*)
-
-  MyRegex.new_nfa (Char 'D') []; (*8*)
-  MyRegex.new_nfa (Char '.') []; (*9*)
-  { epsilon_nfa with next_2 = Some 3 }; (*10*)
-  MyRegex.new_nfa (Char 'D') []; (*11*)
-  { epsilon_nfa with next_2 = Some (-1) }; (*12*)
-  epsilon_nfa; (*13*)
-
-  { epsilon_nfa with next = None }; (*14*)
-]
-let char_set = ['D'; '.']
-
-let dfa_minimization (dfa: NfaToDfa.t) =
+let minimization (dfa: NfaToDfa.t) =
   let transition_list: NfaToDfa.transition list = dfa.transition_list in
   let g1, g2 = List.partition (fun (x: NfaToDfa.transition) -> x.accept = None) transition_list in
-  (*
+  (* ie:
 g1 = { dfa_state = 0;c = D;next_dfa_state = Some 1;accept = None };
 { dfa_state = 0;c = .;next_dfa_state = Some 2;accept = None };
 { dfa_state = 2;c = D;next_dfa_state = Some 3;accept = None };
@@ -126,7 +99,7 @@ g2 = { dfa_state = 5;c = D;next_dfa_state = Some 6;accept = Some 14 };
         | None, None ->
           just_one_partition char_set (char_set_index + 1)
       in
-      let new_group = just_one_partition char_set 0 in
+      let new_group = just_one_partition dfa.char_set 0 in
       acc @ new_group
     | _, _ -> acc
   in
@@ -135,11 +108,11 @@ g2 = { dfa_state = 5;c = D;next_dfa_state = Some 6;accept = Some 14 };
     if List.length groups = groups_index then
       groups
     else
-      let g = List.nth groups groups_index in
-      match g with
+      match List.nth groups groups_index with
       | [] ->
         iterate groups (groups_index + 1)
-      | _ ->
+      | g ->
+        let groups = List.filter (fun x -> x != g) groups in
         let first_index = 0 in
         let first = List.nth g first_index in
         let next_index = find_next g first.dfa_state first_index in
@@ -147,18 +120,18 @@ g2 = { dfa_state = 5;c = D;next_dfa_state = Some 6;accept = Some 14 };
           match next_index with
           | Some next_index -> List.nth_opt g next_index
           | None -> None in
-        (* si g' es vacio quiere decir que todos
-        los elmentos de g son validos *)
         print_endline "voy a analizar este grupo";
         NfaToDfa.print_transition_list g |> print_endline; print_newline ();
-        let g' = iterate' g first first_index next next_index [] in
         print_endline "----------------->";
-        NfaToDfa.print_transition_list g' |> print_endline; print_newline ();
-        let groups = List.filter (fun x -> x != g) groups in
-        match g' with
+        match iterate' g first first_index next next_index [] with
         | [] ->
+          print_endline "\t analize del grupo es vacio";
+          (* si g' es vacio quiere decir que todos
+            los elmentos de g son validos *)
           iterate ([g] @ groups) (groups_index + 1)
-        | _ ->
+        | g' ->
+          print_endline "\t se ha obtenido el siguente analisis";
+          NfaToDfa.print_transition_list g' |> print_endline; print_newline ();
           (* g'' aquellos que estan en g y no en g' *)
           let g'' = List.filter (fun g_x -> not (List.exists (fun g_x' -> g_x' = g_x) g')) g in
           NfaToDfa.print_transition_list g'' |> print_endline; print_newline ();
@@ -167,10 +140,28 @@ g2 = { dfa_state = 5;c = D;next_dfa_state = Some 6;accept = Some 14 };
 
   iterate [g1; g2] 0
 
-let () =
-  let nfa_dfa = NfaToDfa.(make char_set nfa_list |> run [0]) in
-  print_endline "&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&";
-  let minimized_dfa = dfa_minimization nfa_dfa in
-  minimized_dfa |> List.length |> string_of_int |> print_endline;
-  List.iter (fun x -> NfaToDfa.print_transition_list x |> print_endline; print_endline "-!") minimized_dfa;
-  ()
+  (*
+  output: [
+[{ dfa_state = 0;c = D;next_dfa_state = Some 1;accept = None };
+{ dfa_state = 0;c = .;next_dfa_state = Some 2;accept = None }];
+
+[{ dfa_state = 4;c = D;next_dfa_state = Some 4;accept = None };
+{ dfa_state = 4;c = .;next_dfa_state = Some 2;accept = None }];
+
+[{ dfa_state = 5;c = D;next_dfa_state = Some 6;accept = Some 14 };
+{ dfa_state = 5;c = .;next_dfa_state = None;accept = Some 14 };
+{ dfa_state = 6;c = D;next_dfa_state = Some 7;accept = Some 14 };
+{ dfa_state = 6;c = .;next_dfa_state = None;accept = Some 14 };
+{ dfa_state = 7;c = D;next_dfa_state = Some 7;accept = Some 14 };
+{ dfa_state = 7;c = .;next_dfa_state = None;accept = Some 14 }];
+
+[{ dfa_state = 3;c = D;next_dfa_state = None;accept = Some 14 };
+{ dfa_state = 3;c = .;next_dfa_state = None;accept = Some 14 }];
+
+[{ dfa_state = 2;c = D;next_dfa_state = Some 3;accept = None };
+{ dfa_state = 2;c = .;next_dfa_state = None;accept = None }];
+
+[{ dfa_state = 1;c = D;next_dfa_state = Some 4;accept = None };
+{ dfa_state = 1;c = .;next_dfa_state = Some 5;accept = None }]
+]
+  *)

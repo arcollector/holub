@@ -1,0 +1,3 @@
+"test.ml": pp(camlp4o)
+"myRegexLexer.ml": pp(camlp5o)
+"myRegexParser.ml": pp(camlp5o)
