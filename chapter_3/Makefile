@@ -1,0 +1,15 @@
+left_assoc_right_recursive_list:
+	ocamlbuild left_assoc_right_recursive_list.byte
+	./left_assoc_right_recursive_list.byte
+
+right_assoc_right_recursive_list:
+	ocamlbuild right_assoc_right_recursive_list.byte
+	./right_assoc_right_recursive_list.byte
+
+simple_expression_grammar:
+	ocamlbuild simple_expression_grammar.byte
+	./simple_expression_grammar.byte
+
+simple_expression_grammar_camlp5:
+	ocamlbuild simple_expression_grammar_camlp5.byte
+	./simple_expression_grammar_camlp5.byte
