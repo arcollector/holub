@@ -9,3 +9,7 @@ indices por favor
 
 Me falta hacer el ultimo paso de generar el nuevo dfa
 una vez que tengo mi tablita final hecha
+
+## ^ and $ regex support
+
+Implementar cuando una regex tiene los modificadores ^ y $
